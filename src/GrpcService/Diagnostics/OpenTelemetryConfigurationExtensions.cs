@@ -3,13 +3,13 @@ using OpenTelemetry.Trace;
 
 using System.Reflection;
 
-namespace WebApi.Diagnostics;
+namespace GrpcService.Diagnostics;
 
 public static class OpenTelemetryConfigurationExtensions
 {
     public static WebApplicationBuilder AddOpenTelemetry(this WebApplicationBuilder builder)
     {
-        const string serviceName = "WebApi";
+        const string serviceName = "GrpcService";
 
         var version = Assembly.GetExecutingAssembly().GetName().Version!.ToString();
 
@@ -24,14 +24,14 @@ public static class OpenTelemetryConfigurationExtensions
                     serviceVersion: version)
                 .AddAttributes(
                 [
-                    new KeyValuePair<string, object>("service.webapi.environment", "development") // custom attribute
+                    new KeyValuePair<string, object>("service.grpcservice.environment", "development") // custom attribute
                 ]);
         })
         .WithTracing(tracing =>
         {
             tracing
                 .AddAspNetCoreInstrumentation()
-                .AddGrpcClientInstrumentation()
+                .AddGrpcCoreInstrumentation()
                 .AddConsoleExporter()
                 .AddOtlpExporter(otlpOptions =>
                 {

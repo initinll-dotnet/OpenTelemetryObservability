@@ -1,11 +1,32 @@
+using GrpcService;
+
 using WebApi.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var greeterGrpcUrl = builder.Configuration["GrpcSettings:GreeterUrl"]!;
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddProblemDetails();
+
+builder.Services.AddGrpcClient<Greeter.GreeterClient>(options =>
+{
+    options.Address = new Uri(greeterGrpcUrl);
+})
+.ConfigurePrimaryHttpMessageHandler(() =>
+{
+    var handler = new HttpClientHandler
+    {
+        ServerCertificateCustomValidationCallback =
+        HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+    };
+
+    return handler;
+});
 
 builder.AddOpenTelemetry();
 
@@ -25,8 +46,11 @@ var summaries = new[]
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
 };
 
-app.MapGet("/weatherforecast", () =>
+app.MapGet("/weatherforecast", (Greeter.GreeterClient greeterClient) =>
 {
+    var helloResponse = greeterClient.SayHello(new HelloRequest { Name = "WebApi" });
+    var msg = helloResponse.Message;
+
     var forecast = Enumerable.Range(1, 5).Select(index =>
         new WeatherForecast
         (

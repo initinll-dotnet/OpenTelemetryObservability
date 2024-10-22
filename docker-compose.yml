@@ -1,11 +1,27 @@
 version: '3.4'
 
 services:
-  webapi:
-    container_name: webapi
+
+  grpcservice:
+    image: ${DOCKER_REGISTRY-}grpcservice
+    container_name: grpcservice
     build:
       context: .
-      dockerfile: src/WebApi/Dockerfile
+      dockerfile: src/GrpcService/Dockerfile
+
+  webapi:
+    image: ${DOCKER_REGISTRY-}webapi
+    container_name: webapi
+    depends_on: 
+      - grpcservice
+    build:
+      context: .
+      dockerfile: src/WebApi/Dockerfile   
+      
   jaeger:
-    container_name: jaeger
     image: jaegertracing/all-in-one:1.62.0
+    container_name: jaeger
+    depends_on: 
+      - grpcservice
+      - webapi
+
