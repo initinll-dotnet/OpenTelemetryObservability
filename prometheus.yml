@@ -3,7 +3,9 @@ global:
   scrape_interval: 5s       # How frequently to scrape targets by default.
   evaluation_interval: 30s  # How frequently to evaluate rules.
 scrape_configs:             # A scrape_config section specifies a set of targets and parameters describing how to scrape them
- - job_name: webapi         # The job name assigned to scraped metrics by default
+ # - job_name: webapi         # The job name assigned to scraped metrics by default
+ - job_name: opentelemetry-collector         # The job name assigned to scraped metrics by default
    static_configs:          # List of labeled statically configured targets for this job.
     - targets:
-       - 'webapi:8080'
+       # - 'webapi:8080'    # commenting and enabling collector
+       - 'opentelemetry-collector:8889' # enabling collector

@@ -37,7 +37,7 @@ services:
     ports:
         # https://www.jaegertracing.io/docs/1.62/getting-started/
         - "16686:16686" # Jaeger UI
-        - "4317:4317" # accept OpenTelemetry Protocol (OTLP) over gRPC
+        # - "4317:4317" # accept OpenTelemetry Protocol (OTLP) over gRPC (commented for avoid collector port clash)
         - "4318:4318" # accept OpenTelemetry Protocol (OTLP) over HTTP
 
   aspire:
@@ -62,3 +62,16 @@ services:
      - '3000:3000'
     volumes:
      - ./grafana.datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+
+  opentelemetry-collector:
+    environment:
+     - JAEGER_ENDPOINT=jaeger:4317
+    ports:
+    # https://opentelemetry.io/docs/collector/installation/
+     - 8889:8889 # Prometheus exporter metrics
+     - 13133:13133 # health_check extension
+     - 55679:55679 # zpages extension
+     - 4317:4317 # OTLP gRPC receiver
+    command: --config /etc/otelcol-contrib/config.yaml
+    volumes:
+     - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml

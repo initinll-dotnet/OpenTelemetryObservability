@@ -44,7 +44,7 @@ if (app.Environment.IsDevelopment())
 // This will add the Prometheus scraping endpoint to the pipeline so that Prometheus can scrape metrics from this app
 // Prometheus uses pull-based monitoring, so it will scrape metrics from this endpoint at a regular interval based on prometheus configuration in prometheus.yml
 // nuget package: OpenTelemetry.Exporter.Prometheus
-app.UseOpenTelemetryPrometheusScrapingEndpoint();
+//app.UseOpenTelemetryPrometheusScrapingEndpoint();
 
 app.UseHttpsRedirection();
 
