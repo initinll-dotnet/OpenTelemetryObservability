@@ -37,6 +37,11 @@ public static class OpenTelemetryConfigurationExtensions
                 {
                     // https://www.jaegertracing.io/docs/1.62/getting-started/
                     otlpOptions.Endpoint = new Uri("http://jaeger:4317"); // Jaeger endpoint via docker compose
+                })
+                .AddOtlpExporter(otlpOptions =>
+                {
+                    // https://learn.microsoft.com/en-us/dotnet/aspire/fundamentals/dashboard/standalone?tabs=bash
+                    otlpOptions.Endpoint = new Uri("http://aspire:18889"); // Aspire endpoint via docker compose
                 });
         });
 

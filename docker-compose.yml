@@ -24,4 +24,10 @@ services:
     depends_on: 
       - grpcservice
       - webapi
-
+  
+  aspire:
+    image: mcr.microsoft.com/dotnet/aspire-dashboard:8.2
+    container_name: aspire
+    depends_on: 
+      - grpcservice
+      - webapi
