@@ -31,6 +31,7 @@ public static class OpenTelemetryConfigurationExtensions
         {
             tracing
                 .AddAspNetCoreInstrumentation()
+                .AddHttpClientInstrumentation()
                 .AddGrpcClientInstrumentation()
                 .AddConsoleExporter()
                 .AddOtlpExporter(otlpOptions =>
