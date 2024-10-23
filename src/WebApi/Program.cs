@@ -41,6 +41,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// This will add the Prometheus scraping endpoint to the pipeline so that Prometheus can scrape metrics from this app
+// Prometheus uses pull-based monitoring, so it will scrape metrics from this endpoint at a regular interval based on prometheus configuration in prometheus.yml
+// nuget package: OpenTelemetry.Exporter.Prometheus
+app.UseOpenTelemetryPrometheusScrapingEndpoint();
+
 app.UseHttpsRedirection();
 
 var summaries = new[]
@@ -48,10 +53,13 @@ var summaries = new[]
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
 };
 
-app.MapGet("/weatherforecast", (Greeter.GreeterClient greeterClient) =>
+app.MapGet("/weatherforecast", () =>
 {
-    var helloResponse = greeterClient.SayHello(new HelloRequest { Name = "WebApi" });
-    var msg = helloResponse.Message;
+    // Custom meter added in ApplicationDiagnostics.cs
+    ApplicationDiagnostics
+    .WeatherForecastCounter
+    .Add(delta: 1, 
+        tags: [new KeyValuePair<string, object?>(key: "client.api", value: "weatherforecast")]);
 
     var forecast = Enumerable.Range(1, 5).Select(index =>
         new WeatherForecast
