@@ -1,5 +1,7 @@
 using GrpcService;
 
+using System.Diagnostics;
+
 using WebApi.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -62,6 +64,18 @@ app.MapGet("/weatherforecast", (Greeter.GreeterClient greeterClient) =>
     return forecast;
 })
 .WithName("GetWeatherForecast")
+.WithOpenApi();
+
+app.MapGet("/sayhello/{name}", (string name, Greeter.GreeterClient greeterClient) =>
+{
+    // additional context - custom tag
+    Activity.Current?.SetTag("greeter.name", name);
+
+    var helloResponse = greeterClient.SayHello(new HelloRequest { Name = name });
+    var msg = helloResponse.Message;
+    return msg;
+})
+.WithName("Greeter")
 .WithOpenApi();
 
 app.Run();
