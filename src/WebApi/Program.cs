@@ -69,7 +69,7 @@ app.MapGet("/weatherforecast", (Greeter.GreeterClient greeterClient) =>
 app.MapGet("/sayhello/{name}", (string name, Greeter.GreeterClient greeterClient) =>
 {
     // additional context - custom tag
-    Activity.Current?.SetTag("greeter.name", name);
+    Activity.Current?.SetGreeterName(name);
 
     var helloResponse = greeterClient.SayHello(new HelloRequest { Name = name });
     var msg = helloResponse.Message;
