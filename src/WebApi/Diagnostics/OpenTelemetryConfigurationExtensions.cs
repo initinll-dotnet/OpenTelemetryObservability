@@ -1,4 +1,5 @@
-﻿using OpenTelemetry.Metrics;
+﻿using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
@@ -42,7 +43,7 @@ public static class OpenTelemetryConfigurationExtensions
                 .AddAspNetCoreInstrumentation()
                 .AddHttpClientInstrumentation()
                 .AddGrpcClientInstrumentation()
-                .AddConsoleExporter()
+                //.AddConsoleExporter()
                 //.AddOtlpExporter(otlpOptions =>
                 //{
                 //    // Jaegar to visualize traces (open-source)
@@ -74,7 +75,7 @@ public static class OpenTelemetryConfigurationExtensions
                 // https://docs.microsoft.com/en-us/dotnet/core/diagnostics/metrics
                 .AddMeter("Microsoft.AspNetCore.Hosting")
                 .AddMeter("Microsoft.AspNetCore.Server.Kestrel")
-                .AddConsoleExporter()
+                //.AddConsoleExporter()
                 //.AddPrometheusExporter(); // Prometheus exporter
                 // prometheus will scrape metrics from this app at a regular interval based on prometheus configuration in prometheus.yml
                 // endpoint in program.cs -> app.UseOpenTelemetryPrometheusScrapingEndpoint();
@@ -85,6 +86,24 @@ public static class OpenTelemetryConfigurationExtensions
                     // https://opentelemetry.io/docs/collector/
                     otlpOptions.Endpoint = new Uri(otlpCollectorEndpoint);
                 });
+        })
+        .WithLogging(logging =>
+        {
+            logging
+            //.AddConsoleExporter()
+            .AddOtlpExporter(otlpOptions =>
+            {
+                // Vendor-agnostic way to receive, process and export telemetry data.
+                // Above two are Collector less as the telemetry is directly send to jager and prometheus backends
+                // https://opentelemetry.io/docs/collector/
+                otlpOptions.Endpoint = new Uri(otlpCollectorEndpoint);
+
+            });
+
+
+        }, options =>
+        {
+            options.IncludeFormattedMessage = true;
         });
 
         return builder;

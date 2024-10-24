@@ -4,8 +4,8 @@ namespace WebApi.Diagnostics;
 
 public static class ActivityExtensions
 {
-    public static void SetGreeterName(this Activity activity, string name)
+    public static void SetTag(this Activity activity, string key, object value)
     {
-        activity?.SetTag("greeter.name", name);
+        activity?.SetTag(key, value);
     }
 }

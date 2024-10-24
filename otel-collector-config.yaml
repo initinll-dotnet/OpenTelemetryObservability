@@ -1,22 +1,26 @@
 receivers:
-  otlp:
+  otlp/collector:
     protocols:
       grpc:
-        endpoint: 0.0.0.0:4317
+        endpoint: 0.0.0.0:4317 # opentelemetry-collector GRPC port
       http:
-        endpoint: 0.0.0.0:4318
+        endpoint: 0.0.0.0:4318 # opentelemetry-collector HTTP port
 
 processors:
   batch:
 
 exporters:
   debug:
-  otlp:
-    endpoint: "${JAEGER_ENDPOINT}" # opentelemetry-collector environment (docker compose)
+  otlp/jaeger:
+    endpoint: "${JAEGER_ENDPOINT}"  # Jaeger exporter
     tls:
       insecure: true
   prometheus:
-    endpoint: "0.0.0.0:8889"
+    endpoint: "0.0.0.0:8889"        # Prometheus exporter
+  loki:
+    endpoint: "http://loki:3100/loki/api/v1/push"   # Loki exporter
+    tls:
+      insecure: true
 
 extensions:
   health_check:
@@ -27,14 +31,14 @@ service:
   extensions: [health_check, pprof, zpages]
   pipelines:
     traces:
-      receivers: [otlp]
+      receivers: [otlp/collector]
       processors: [batch]
-      exporters: [debug, otlp]
+      exporters: [debug, otlp/jaeger]
     metrics:
-      receivers: [otlp]
+      receivers: [otlp/collector]
       processors: [batch]
       exporters: [debug, prometheus]
-    # logs:
-    #   receivers: [otlp]
-    #   processors: [batch]
-    #   exporters: [otlp]
+    logs:
+      receivers: [otlp/collector]
+      processors: [batch]
+      exporters: [debug, loki]

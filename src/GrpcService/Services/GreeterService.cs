@@ -2,6 +2,11 @@ using Grpc.Core;
 
 using GrpcService;
 
+using OpenTelemetry;
+using OpenTelemetry.Trace;
+
+using System.Diagnostics;
+
 namespace GrpcService.Services;
 public class GreeterService : Greeter.GreeterBase
 {
@@ -13,9 +18,27 @@ public class GreeterService : Greeter.GreeterBase
 
     public override Task<HelloReply> SayHello(HelloRequest request, ServerCallContext context)
     {
-        return Task.FromResult(new HelloReply
+        var requestId = Baggage.Current.GetBaggage("request.id");
+
+        Activity.Current?.SetTag("request.id", requestId);
+
+        try
         {
-            Message = "Hello " + request.Name
-        });
+            var selectedValue = Random.Shared.GetItems([0 ,1, 2, 3], 1).First();
+            var res = 1 / selectedValue;
+
+            return Task.FromResult(new HelloReply
+            {
+                Message = "Hello " + request.Name
+            });
+        }
+        catch (Exception ex)
+        {
+            Activity.Current?.SetStatus(ActivityStatusCode.Error, ex.Message);
+
+            Activity.Current?.RecordException(ex);
+
+            throw;
+        }       
     }
 }

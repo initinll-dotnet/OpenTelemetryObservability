@@ -45,6 +45,10 @@ services:
     depends_on:
       - jaeger
       - prometheus
+
+  loki:
+    image: grafana/loki:2.9.2
+    container_name: loki
   
   opentelemetry-collector:
     image: otel/opentelemetry-collector-contrib:0.111.0

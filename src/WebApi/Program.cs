@@ -1,5 +1,7 @@
 using GrpcService;
 
+using OpenTelemetry;
+
 using System.Diagnostics;
 
 using WebApi.Diagnostics;
@@ -58,7 +60,7 @@ app.MapGet("/weatherforecast", () =>
     // Custom meter added in ApplicationDiagnostics.cs
     ApplicationDiagnostics
     .WeatherForecastCounter
-    .Add(delta: 1, 
+    .Add(delta: 1,
         tags: [new KeyValuePair<string, object?>(key: "client.api", value: "weatherforecast")]);
 
     var forecast = Enumerable.Range(1, 5).Select(index =>
@@ -76,8 +78,16 @@ app.MapGet("/weatherforecast", () =>
 
 app.MapGet("/sayhello/{name}", (string name, Greeter.GreeterClient greeterClient) =>
 {
+    app.Logger.LogInformation("Username for sayhello endpoint: {name}", name);
+
+    var requestId = Guid.NewGuid().ToString();
+
+    // adding Baggage to the current activity
+    Baggage.SetBaggage("request.id", requestId);
+
     // additional context - custom tag
-    Activity.Current?.SetGreeterName(name);
+    Activity.Current?.SetTag("request.id", requestId);
+    Activity.Current?.SetTag("greeter.id", name);
 
     var helloResponse = greeterClient.SayHello(new HelloRequest { Name = name });
     var msg = helloResponse.Message;
